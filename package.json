@@ -1,0 +1,31 @@
+{
+  "name": "snowstaking",
+  "version": "1.0.0-alpha",
+  "description": "The better Discord Snowsgiving bot",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node fire.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quantum9Innovation/snowstaking.git"
+  },
+  "keywords": [
+    "Discord",
+    "bot",
+    "Snowsgiving",
+    "Christmas",
+    "holiday",
+    "game"
+  ],
+  "author": "quantum9innovation",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/quantum9Innovation/snowstaking/issues"
+  },
+  "homepage": "https://github.com/quantum9Innovation/snowstaking#readme",
+  "dependencies": {
+    "griddedjs": "^1.0.2"
+  }
+}
