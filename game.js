@@ -1,10 +1,14 @@
 // Here lies the core logic behind the game.
-// This script is invoked each time `index.js` receives a request.
+//  This script is invoked each time `index.js` receives a request.
+
 
 // Imports
 //  CommonJS modules imported differently for compatibility reasons.
+import * as fs from 'fs'
 import pkg from 'griddedjs'
 const { Grid2D } = pkg
+import pkg2 from 'canvas'
+const { createCanvas } = pkg2
 
 
 // Initialize the map
@@ -55,7 +59,59 @@ for (let i = 0; i < 3; i++) {
     ]
 }
 
-// Testing stuff:
-//console.log(objects.cell(playerA[0][0], playerA[0][1]).value)
-//console.log(objects.cell(0, 0).value)
-//console.log(playerA, playerB)
+
+// Initialize game state
+//  Keeps track of board configuration
+let state = new Grid2D(10, 10)
+state.fill(0)
+
+state.cell(playerA[1][0], playerA[1][1]).value = 1
+state.cell(playerB[1][0], playerB[1][1]).value = 1
+
+
+// Visualizers
+//  These functions are invoked by `index.js` to visualize the game state.
+//  They produce a .png image of the current game state.
+let snapshot = () => {
+    
+    const canvas = createCanvas(800, 800)
+    const ctx = canvas.getContext('2d')
+    const cs = canvas.height
+    
+    let count = 0
+    for ( let x = 0; x < 10; x++ ) {
+        for ( let y = 0; y < 10; y++ ) {
+            count += state.cell(x, y).value
+        }
+    }
+
+    for ( let x = 0; x < 10; x++ ) {
+        for ( let y = 0; y < 10; y++ ) {
+
+            let intensity = state.cell(x, y).value / count * 100
+            let transformer = (intensity) => {
+                return 255 - (intensity / (intensity + 1) * 255)
+            }
+            let red = `rgb(255, ${transformer(intensity)}, ${transformer(intensity)})`
+            let blue = `rgb(${transformer(intensity)}, ${transformer(intensity)}, 255)`
+
+            if ( map.cell(x, y).value == 0 ) {
+                ctx.fillStyle = red
+            } else if ( map.cell(x, y).value == 1 ) {
+                ctx.fillStyle = blue
+            } else {
+                ctx.fillStyle = 'white'
+            }
+            ctx.fillRect(cs / 12 * (1 + x), cs / 12 * (1 + y), cs / 12, cs / 12)
+        
+        }
+    }
+
+    const out = fs.createWriteStream('./test.png')
+    const stream = canvas.createPNGStream()
+    stream.pipe(out)
+    out.on('finish', () =>  console.log('The PNG file was created.'))
+
+}
+
+snapshot()

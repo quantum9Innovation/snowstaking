@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/quantum9Innovation/snowstaking#readme",
   "dependencies": {
+    "canvas": "^2.8.0",
     "griddedjs": "^1.0.2"
   }
 }
