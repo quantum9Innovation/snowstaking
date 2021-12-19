@@ -5,6 +5,7 @@
 // Imports
 //  CommonJS modules imported differently for compatibility reasons.
 import * as fs from 'fs'
+import * as mod from './mod.js'
 import pkg from 'griddedjs'
 const { Grid2D } = pkg
 import pkg2 from 'canvas'
@@ -14,16 +15,22 @@ const { createCanvas } = pkg2
 // Initialize the map
 //  0 => Player A
 //  1 => Player B
-let map = new Grid2D(10, 10)
-map.fill(0)
+let generateMap = (id) => {
 
-let rows = [...map.getY()];
-let cols = [...map.getX()];
-
-for (let col = 0; col < cols.length / 2; col++) {
-    for (let row = 0; row < rows.length; row++) {
-        map.cell(col, row).value = 1
+    let map = new Grid2D(10, 10)
+    map.fill(0)
+    
+    let rows = [...map.getY()];
+    let cols = [...map.getX()];
+    
+    for (let col = 0; col < cols.length / 2; col++) {
+        for (let row = 0; row < rows.length; row++) {
+            map.cell(col, row).value = 1
+        }
     }
+
+    mod.dump(map, 'map', id)
+
 }
 
 
@@ -31,48 +38,62 @@ for (let col = 0; col < cols.length / 2; col++) {
 //  0 => Capitol
 //  1 => Igloo
 //  2 => Factory
-let objects = new Grid2D(10, 10)
-objects.fill([])
+let generateObj = (id) => {
 
-let playerA = new Set()
-let playerB = new Set()
+    let objects = new Grid2D(10, 10)
+    objects.fill([])
+    
+    let playerA = new Set()
+    let playerB = new Set()
+    
+    while (playerA.size < 3) { 
+        playerA.add([
+            Math.floor(Math.random() * 5) + 0,
+            Math.floor(Math.random() * 10) + 0
+        ]) 
+    } while (playerB.size < 3) { 
+        playerB.add([
+            Math.floor(Math.random() * 5) + 5,
+            Math.floor(Math.random() * 10) + 0
+        ]) 
+    }
+    
+    playerA = [...playerA]
+    playerB = [...playerB]
+    
+    for (let i = 0; i < 3; i++) {
+        objects.cell(playerA[i][0], playerA[i][1]).value = [
+            ...objects.cell(playerA[i][0], playerA[i][1]).value,
+            i
+        ]
+    }
 
-while (playerA.size < 3) { 
-    playerA.add([
-        Math.floor(Math.random() * 5) + 0,
-        Math.floor(Math.random() * 10) + 0
-    ]) 
-} while (playerB.size < 3) { 
-    playerB.add([
-        Math.floor(Math.random() * 5) + 5,
-        Math.floor(Math.random() * 10) + 0
-    ]) 
-}
+    mod.dump(objects, 'obj', id)
+    mod.meta(playerA, 'A', id, 'w')
+    mod.meta(playerB, 'B', id, 'w')
 
-playerA = [...playerA]
-playerB = [...playerB]
-
-for (let i = 0; i < 3; i++) {
-    objects.cell(playerA[i][0], playerA[i][1]).value = [
-        ...objects.cell(playerA[i][0], playerA[i][1]).value,
-        i
-    ]
 }
 
 
 // Initialize game state
 //  Keeps track of board configuration
-let state = new Grid2D(10, 10)
-state.fill(0)
+let generateState = (playerA, playerB, id) => {
 
-state.cell(playerA[1][0], playerA[1][1]).value = 1
-state.cell(playerB[1][0], playerB[1][1]).value = 1
+    let state = new Grid2D(10, 10)
+    state.fill(0)
+
+    state.cell(playerA[1][0], playerA[1][1]).value = 1
+    state.cell(playerB[1][0], playerB[1][1]).value = 1
+
+    mod.dump(state, 'state', id)
+
+}
 
 
 // Visualizers
 //  These functions are invoked by `index.js` to visualize the game state.
 //  They produce a .png image of the current game state.
-let snapshot = () => {
+let snapshot = (map, objects, state) => {
     
     const canvas = createCanvas(800, 800)
     const ctx = canvas.getContext('2d')
@@ -107,11 +128,18 @@ let snapshot = () => {
         }
     }
 
-    const out = fs.createWriteStream('./test.png')
+    const out = fs.createWriteStream('temp/test.png')
     const stream = canvas.createPNGStream()
     stream.pipe(out)
     out.on('finish', () =>  console.log('The PNG file was created.'))
 
 }
 
-snapshot()
+
+// Export functions
+export {
+    generateMap,
+    generateObj,
+    generateState,
+    snapshot
+}
