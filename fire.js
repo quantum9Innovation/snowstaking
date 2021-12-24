@@ -5,7 +5,7 @@ import * as game from './game.js'
 import * as mod from './mod.js'
 import * as route from './route.js'
 
-const ID = 8080
+const ID = 0
 game.generateMap(ID)
 game.generateObj(ID)
 
@@ -28,7 +28,7 @@ state = mod.read('state', ID)
 game.invade(map, state, [4, 5], 0, ID)
 map = mod.read('map', ID)
 state = mod.read('state', ID)
-game.snapshot(map, obj, state)
+game.snapshot(map, obj, state, 'test')
 
 console.log('Path test:'); route.runTests()
 console.log('\nIs game over?')

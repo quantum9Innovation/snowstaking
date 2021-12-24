@@ -132,7 +132,7 @@ let toPng = (canvas, name) => {
 
 }
 
-let snapshot = (map, objects, state) => {
+let snapshot = (map, objects, state, filename) => {
     // [Grid2D Object] => [Canvas Object]
     // Calls `legend` to append a legend to the base map
     // Output is stored at `temp/snap.png`
@@ -209,7 +209,7 @@ let snapshot = (map, objects, state) => {
     }
 
     legend(state, canvas.width, ctx)
-    toPng(canvas, 'snap')
+    toPng(canvas, filename)
 
 }
 
