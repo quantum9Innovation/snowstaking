@@ -29,11 +29,9 @@ let read = (type, id) => {
     data = JSON.parse(data)
 
     let map = new Grid2D(10, 10)
-    let rows = [...map.getY()];
-    let cols = [...map.getX()];
 
-    for ( let row = 0; row < rows.length; row++ ) {
-        for ( let col = 0; col < cols.length; col++ ) {
+    for ( let row = 0; row < 10; row++ ) {
+        for ( let col = 0; col < 10; col++ ) {
             map.cell(col, row).value = data[row * 10 + col]
         }
     }
