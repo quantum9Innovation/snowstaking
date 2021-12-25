@@ -103,6 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
+# DiscordJS
+config.json
+
 # Project-specific files
-data/*0.json
-temp/test.png
+data/*.json
+temp/*.png
