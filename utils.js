@@ -81,6 +81,15 @@ let startGame = async (int, data) => {
     game.generateState(playerA, playerB, int.channelId)
 
     let processes = JSON.parse(fs.readFileSync(`data/_HEAP.json`))
+    for ( let i = 0; i < processes.length; i++ ) {
+        if ( 
+            processes[i][0] == 'close' && 
+            processes[i][3] == int.channelId
+        ) {
+            processes.splice(i, 1)
+            break
+        }
+    }
     processes.push(['refill', Date.now(), 5 * 60 * 1000, int.channelId])
     fs.writeFileSync(`data/_HEAP.json`, JSON.stringify(processes))
 
@@ -383,6 +392,17 @@ let close = async (int) => {
     if (Date.now() >= data.registrationDate) {
         if ( data.user == int.member.id ) {
             fs.unlinkSync(`data/game${int.channelId}.json`, () => {})
+            let processes = JSON.parse(fs.readFileSync('data/_HEAP.json'))
+            for ( let i = 0; i < processes.length; i++ ) {
+                if ( 
+                    processes[i][0] == 'close' && 
+                    processes[i][3] == int.channelId
+                ) {
+                    processes.splice(i, 1)
+                    break
+                }
+            }
+            fs.writeFileSync('data/_HEAP.json', JSON.stringify(processes))
             await int.reply(
                 'Game closed!* :white_check_mark:\n' + 
                 '**Winners not reported for premature games*'
@@ -460,7 +480,7 @@ let move = async (int) => {
     }
 
     let result = game.move(
-        map, state, coordinates[0], coordinates[1], int.channelId
+        map, state, coordinates[1], coordinates[0], int.channelId
     )
 
     if ( result ) {
