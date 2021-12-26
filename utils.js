@@ -394,10 +394,7 @@ let close = async (int) => {
             fs.unlinkSync(`data/game${int.channelId}.json`, () => {})
             let processes = JSON.parse(fs.readFileSync('data/_HEAP.json'))
             for ( let i = 0; i < processes.length; i++ ) {
-                if ( 
-                    processes[i][0] == 'close' && 
-                    processes[i][3] == int.channelId
-                ) {
+                if (  processes[i][3] == int.channelId ) {
                     processes.splice(i, 1)
                     break
                 }
