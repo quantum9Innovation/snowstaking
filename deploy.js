@@ -37,9 +37,21 @@ const commands = [
     new SlashCommandBuilder().setName('stats').
     setDescription('Get your stats, game stats, and leaderboard information'),
     new SlashCommandBuilder().setName('move').
-    setDescription('Move snowmen to a new location'),
+    setDescription('Move snowmen to a new location')
+    .addStringOption(option =>
+		option.setName('start')
+			.setDescription('Starting square coordinates')
+			.setRequired(true))
+    .addStringOption(option =>
+        option.setName('end')
+            .setDescription('Ending square coordinates')
+            .setRequired(true)),
     new SlashCommandBuilder().setName('attack').
-    setDescription('Attack a square'),
+    setDescription('Attack a square')
+    .addStringOption(option =>
+		option.setName('square')
+			.setDescription('Coordinates of square to attack')
+			.setRequired(true)),
     new SlashCommandBuilder().setName('count').
     setDescription('Get information on your snowball and snowmen counts'),
     new SlashCommandBuilder().setName('purchase').

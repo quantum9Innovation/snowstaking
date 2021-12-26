@@ -171,6 +171,16 @@ let snapshot = (map, objects, state, filename) => {
                 ctx.fillStyle = 'white'; color = '#fff'
             }
             ctx.fillRect(cs / 12 * (1 + x), cs / 12 * (1 + y), cs / 12, cs / 12)
+            
+            if ( transformer(intensity) < 127.5 ) { ctx.fillStyle = 'white' }
+            else { ctx.fillStyle = 'black' }
+
+            ctx.font = `${cs / 25}px Arial`
+            ctx.fillText(
+                mod.grid2alpha(x, y), 
+                cs / 12 * (1 + x) + cs / 12 / 2, 
+                cs / 12 * (1 + y) + cs / 12 / 2
+            )
         
             let contents = objects.cell(x, y).value
             if ( contents.length > 0 ) {
@@ -393,7 +403,14 @@ let invade = (map, state, to, player, id) => {
         mod.dump(map, 'map', id)
         mod.dump(state, 'state', id)
         return true
-    } else { return false }
+    } else { 
+        map.cell(x, y).neighbor().forEach(c => {
+            let x = c.position().x; let y = c.position().y
+            state.cell(x, y).value = 0
+        })
+        mod.dump(state, 'state', id)
+        return false
+     }
 
 }
 

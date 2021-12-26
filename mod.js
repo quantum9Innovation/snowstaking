@@ -54,10 +54,47 @@ let meta = (array, player, id, mode) => {
 
 }
 
+let grid2alpha = (x, y) => {
+    let alpha = ''
+    switch (x) {
+        case 0: alpha = 'a'; break
+        case 1: alpha = 'b'; break
+        case 2: alpha = 'c'; break
+        case 3: alpha = 'd'; break
+        case 4: alpha = 'e'; break
+        case 5: alpha = 'f'; break
+        case 6: alpha = 'g'; break
+        case 7: alpha = 'h'; break
+        case 8: alpha = 'i'; break
+        case 9: alpha = 'j'; break
+    }
+    return alpha + y
+}
+let alpha2grid = (alpha) => {
+    let x = 0
+    let y = 0
+    switch (alpha[0]) {
+        case 'a': x = 0; break
+        case 'b': x = 1; break
+        case 'c': x = 2; break
+        case 'd': x = 3; break
+        case 'e': x = 4; break
+        case 'f': x = 5; break
+        case 'g': x = 6; break
+        case 'h': x = 7; break
+        case 'i': x = 8; break
+        case 'j': x = 9; break
+    }
+    y = parseInt(alpha[1])
+    return [x, y]
+}
+
 
 // Exports
 export {
     dump,
     read,
-    meta
+    meta,
+    grid2alpha,
+    alpha2grid
 }

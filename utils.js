@@ -43,10 +43,19 @@ let gameNotStarted = async (int) => {
 
 }
 
-let refill = async (int) => {
-    // Wrapper to the `game.refill()` function, runs on intervals
+let notRegistered = async (int) => {
+    // Send message to channel that user is not registered
 
-    
+    const headers = ['Psst...', 'Pro tip:']
+    const tips = [
+        'Create a new game somewhere else with /initiate',
+        'You can join another game in a different channel with /register',
+    ]
+    await int.reply(
+        'You are not registered...\n' +
+        `*${headers[Math.floor(Math.random() * headers.length)]}* ` +
+        `${tips[Math.floor(Math.random() * tips.length)]}`
+    )
 
 }
 
@@ -70,6 +79,10 @@ let startGame = async (int, data) => {
     let playerA = mod.meta([], 'A', int.channelId, 'r')
     let playerB = mod.meta([], 'B', int.channelId, 'r')
     game.generateState(playerA, playerB, int.channelId)
+
+    let processes = JSON.parse(fs.readFileSync(`data/_HEAP.json`))
+    processes.push(['refill', Date.now(), 5 * 60 * 1000, int.channelId])
+    fs.writeFileSync(`data/_HEAP.json`, JSON.stringify(processes))
 
     await new Promise(resolve => setTimeout(resolve, 2500))
     await int.followUp(
@@ -102,8 +115,6 @@ let startGame = async (int, data) => {
         `Run /help for commands.\n` +
         `The game will end in 24 hours.`
     )
-
-    let refillInterval = setInterval(game.refill())
 
 }
 
@@ -270,12 +281,18 @@ let initiate = async (int) => {
                 'members': [user.id],
                 'started': false,
             }
-            fs.writeFileSync(`data/game${int.channelId}.json`, JSON.stringify(data))
+            fs.writeFileSync(
+                `data/game${int.channelId}.json`, JSON.stringify(data)
+            )
             await int.reply(
                 `Starting game... **${playerA_name} vs ${playerB_name}**\n` + 
                 `Registration closes in 5 minutes (use /close to close it before).\n` +
                 `Register with /register`
             )
+
+            let processes = JSON.parse(fs.readFileSync('data/_HEAP.json'))
+            processes.push(['close', Date.now(), 5 * 60 * 1000, int.channelId])
+            fs.writeFileSync('data/_HEAP.json', JSON.stringify(processes))
 
         } else {
             const headers = ['Psst...', 'Pro tip:']
@@ -398,8 +415,136 @@ let map = async (int) => {
         content:
         `Here is the current game state:\n` +
         `**Blue is ${data.playerA_name}, Red is ${data.playerB_name}.*`,
-        files: [`temp/${int.channelId}.png`]
+        files: [`temp/${int.channelId}.png`],
+        ephemeral: true,
     })
+
+}
+
+let move = async (int) => {
+    // Wrapper for `game.move()`
+
+    const start = int.options.getString('start')
+    const end = int.options.getString('end')
+
+    if ( !fs.existsSync(`data/game${int.channelId}.json`) ) {
+        noGameExists(int); return
+    }
+    
+    let data = JSON.parse(fs.readFileSync(`data/game${int.channelId}.json`))
+    if ( !data.started ) { gameNotStarted(int) }
+    
+    let team = false
+    if ( data.teamA.includes(int.member.id) ) { team = 0 }
+    else if ( data.teamB.includes(int.member.id) ) { team = 1 }
+    else { notRegistered(int) }
+
+    let map = mod.read('map', int.channelId)
+    let state = mod.read('state', int.channelId)
+
+    let coordinates = []
+    let start_sq
+    let end_sq
+    
+    try {
+        coordinates = [mod.alpha2grid(start), mod.alpha2grid(end)]
+        start_sq = map.cell(...coordinates[0]).value
+        // eslint-disable-next-line no-unused-vars
+        end_sq = map.cell(...coordinates[1]).value
+    } catch (e) {
+        await int.reply(`Invalid coordinates.`); return
+    }
+
+    if ( start_sq != team ) { 
+        await int.reply(`You can't move the other team's pieces.`); return
+    }
+
+    let result = game.move(
+        map, state, coordinates[0], coordinates[1], int.channelId
+    )
+
+    if ( result ) {
+        await int.reply(
+            `${int.member} moved snowmen from ${start} to ${end}! :snowflake:`
+        )
+    } else {
+        await int.reply({
+            content: 
+            `This move interaction failed. Make sure squares are contiguous.`,
+            ephemeral: true,   
+        })
+    }
+
+}
+
+let attack = async (int) => {
+    // Wrapper for `game.invade()`
+
+    const square = int.options.getString('square')
+
+    if ( !fs.existsSync(`data/game${int.channelId}.json`) ) {
+        noGameExists(int); return
+    }
+    
+    let data = JSON.parse(fs.readFileSync(`data/game${int.channelId}.json`))
+    if ( !data.started ) { gameNotStarted(int) }
+    
+    let team = false
+    if ( data.teamA.includes(int.member.id) ) { team = 0 }
+    else if ( data.teamB.includes(int.member.id) ) { team = 1 }
+    else { notRegistered(int) }
+
+    let map = mod.read('map', int.channelId)
+    let state = mod.read('state', int.channelId)
+
+    let coordinates = []
+    let square_val
+
+    try {
+        coordinates = mod.alpha2grid(square)
+        square_val = map.cell(...coordinates).value
+    } catch (e) {
+        await int.reply(`Invalid coordinates.`); return
+    }
+
+    if ( square_val == team ) { 
+        await int.reply(`You can't attack your own pieces.`); return
+    }
+
+    let result = game.invade(
+        map, state, coordinates, team, int.channelId
+    )
+
+    if ( result ) {
+        await int.reply(
+            `:rotating_light: ${int.member} attacked and acquired ${square}! ` + 
+            `:snowman: :rotating_light:`
+        )
+    } else {
+        await int.reply(
+            `${int.member} suffers a costly defeat on ${square}! :shield:`
+        )
+    }
+
+    map = mod.read('map', int.channelId)
+    let playerA = mod.meta([], 'A', int.channelId, 'r')
+    let playerB = mod.meta([], 'B', int.channelId, 'r')
+    let gameRes = game.isGameOver(map, playerA, playerB)
+
+    if ( gameRes ) {
+
+        fs.unlink(`data/game${int.channelId}.json`, () => {})
+
+        let winner = 'Unknown Winner'
+        if ( team == 0 ) { winner = data.playerA_name }
+        else if ( team == 1 ) { winner = data.playerB_name } 
+
+        await int.followUp(
+            `:fireworks: **Game over! ${winner} won!** :tada: :fireworks:\n` +
+            `*Hint: Want to start a new game? Try /initiate*` 
+        )
+
+    } else { return }
 
 }
 
@@ -410,5 +555,7 @@ export {
     register,
     unregister,
     close,
-    map
+    map,
+    move,
+    attack,
 }
