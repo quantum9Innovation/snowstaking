@@ -415,7 +415,7 @@ let map = async (int) => {
         content:
         `Here is the current game state:\n` +
         `**Blue is ${data.playerA_name}, Red is ${data.playerB_name}.*`,
-        files: [`temp/${int.channelId}.png`],
+        files: [`./temp/${int.channelId}.png`],
         ephemeral: true,
     })
 
