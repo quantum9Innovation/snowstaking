@@ -267,17 +267,17 @@ let initiate = async (int) => {
                 },
             }
 
-            const playerA_name = 
-            names.Democrats.adjectives[
-                Math.floor(Math.random() * names.Democrats.adjectives.length)
-            ] + ' Democratic ' + names.Democrats.animals[
-                Math.floor(Math.random() * names.Democrats.animals.length)
-            ]
-            const playerB_name =
+            const playerA_name =
             names.Republicans.adjectives[
                 Math.floor(Math.random() * names.Republicans.adjectives.length)
             ] + ' Republican ' + names.Republicans.animals[
                 Math.floor(Math.random() * names.Republicans.animals.length)
+            ]
+            const playerB_name = 
+            names.Democrats.adjectives[
+                Math.floor(Math.random() * names.Democrats.adjectives.length)
+            ] + ' Democratic ' + names.Democrats.animals[
+                Math.floor(Math.random() * names.Democrats.animals.length)
             ]
 
             const data = {
