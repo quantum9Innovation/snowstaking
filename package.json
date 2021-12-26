@@ -1,6 +1,6 @@
 {
   "name": "snowstaking",
-  "version": "1.0.0-alpha",
+  "version": "1.0.0-beta",
   "description": "The better Discord Snowsgiving bot",
   "main": "index.js",
   "type": "module",
