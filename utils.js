@@ -421,7 +421,7 @@ let map = async (int) => {
     }
 
     let data = JSON.parse(fs.readFileSync(`data/game${int.channelId}.json`))
-    if ( !data.started ) { gameNotStarted(int) }
+    if ( !data.started ) { gameNotStarted(int); return }
 
     let map = mod.read('map', int.channelId)
     let obj = mod.read('obj', int.channelId)
@@ -454,7 +454,7 @@ let move = async (int) => {
     let team = false
     if ( data.teamA.includes(int.member.id) ) { team = 0 }
     else if ( data.teamB.includes(int.member.id) ) { team = 1 }
-    else { notRegistered(int) }
+    else { notRegistered(int); return }
 
     let map = mod.read('map', int.channelId)
     let state = mod.read('state', int.channelId)
@@ -509,7 +509,7 @@ let attack = async (int) => {
     let team = false
     if ( data.teamA.includes(int.member.id) ) { team = 0 }
     else if ( data.teamB.includes(int.member.id) ) { team = 1 }
-    else { notRegistered(int) }
+    else { notRegistered(int); return }
 
     let map = mod.read('map', int.channelId)
     let state = mod.read('state', int.channelId)
